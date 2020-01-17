@@ -1,0 +1,87 @@
+﻿using ClosedXML.Excel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace FHI
+{
+    public class Common
+    {
+        public void SaveToFiles(List<string> listFailFiles)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Excel Worksheets|*.xlsx";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK && saveFileDialog.FileName != "")
+            {
+                // get file name from dialog
+                string fileName = saveFileDialog.FileName;
+                try
+                {
+                    // create excel file
+                    var workbook = new XLWorkbook();
+                    var worksheet = workbook.Worksheets.Add("Failed Files");
+
+                    // Merge a row
+                    worksheet.Cell("A1").Value = "No";
+                    worksheet.Cell("A1").Style.Fill.BackgroundColor = XLColor.YellowGreen;
+
+                    worksheet.Cell("B1").Value = "Path failed files";
+                    worksheet.Range("B1:N1").Merge();
+                    worksheet.Cell("B1").Style.Fill.BackgroundColor = XLColor.YellowGreen;
+
+                    // fill data
+                    for (int i = 0; i < listFailFiles.Count; i++)
+                    {
+                        worksheet.Cell("A" + (i + 2)).Value = i + 1;
+                        worksheet.Cell("B" + (i + 2)).Value = listFailFiles[i];
+                        worksheet.Range("B" + (i + 2) + ":N" + (i + 2)).Merge();
+
+                        worksheet.Range("A1:N" + (i + 2)).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                        worksheet.Range("A1:N" + (i + 2)).Style.Border.InsideBorderColor = XLColor.Black;
+                        worksheet.Range("A1:N" + (i + 2)).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                        worksheet.Range("A1:N" + (i + 2)).Style.Border.OutsideBorderColor = XLColor.Black;
+                    }
+
+                    workbook.SaveAs(fileName);
+
+                    MessageBox.Show("Save file successfully!", "Alert");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Save file failed!", "Alert");
+                    throw;
+                }
+            }
+        }
+    }
+
+    public class CompareItem {
+        public string Name { get; set; }
+        public int Value { get; set; }
+
+        public CompareItem(string name, int value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
+
+    public class ExcelData
+    {
+        public string Name { get; set; }
+        public bool Status { get; set; }
+        public int STT { get; set; }
+        public ExcelData(string name, bool status, int stt)
+        {
+            Name = name;
+            Status = status;
+            STT = stt;
+        }
+    }
+}
